@@ -1,41 +1,74 @@
-import express from "express";
 import http from "http";
-import WebSocket from "ws";
+import SocketIO from "socket.io";
+import express from "express";
 const app = express();
-
 app.set("view engine", "pug");
 app.set("views", __dirname + "/views");
 app.use("/public", express.static(__dirname + "/public"));
+app.get("/", (_, res) => res.render("home"));
+app.get("/*", (_, res) => res.redirect("/"));
+const httpServer = http.createServer(app);
+const wsServer = SocketIO(httpServer);
 
-app.get("/", (req, res) => res.render("home"));
-app.get("/*", (req, res) => res.redirect("/"));
+function publicRooms() {
+  const {
+    sockets: {
+      adapter: { sids, rooms },
+    },
+  } = wsServer;
+  const publicRooms = [];
+  rooms.forEach((_, key) => {
+    if (sids.get(key) === undefined) {
+      publicRooms.push(key);
+    }
+  });
+  return publicRooms;
+}
 
-const handleListen = () => console.log(`Listening on http://localhost:3000`);
-
-const server = http.createServer(app);
+wsServer.on("connection", (socket) => {
+  socket["nickname"] = "Anon";
+  socket.onAny((event) => {
+    console.log(`Socket Event: ${event}`);
+  });
+  socket.on("enter_room", (roomName, done) => {
+    socket.join(roomName);
+    done();
+    socket.to(roomName).emit("welcome", socket.nickname);
+    wsServer.sockets.emit("room_change",publicRooms())
+  });
+  socket.on("disconnecting", () => {
+    socket.rooms.forEach((room) =>
+      socket.to(room).emit("bye", socket.nickname)  
+    );
+  });
+  socket.on("disconnect", ()=>{
+    wsServer.sockets.emit("room_change",publicRooms())
+  })
+  socket.on("new_message", (msg, room, done) => {
+    socket.to(room).emit("new_message", `${socket.nickname}: ${msg}`);
+    done();
+  });
+  socket.on("nickname", (nickname) => (socket["nickname"] = nickname));
+});
+/*
 const wss = new WebSocket.Server({ server });
-
-// 연결된 브라우저 모두에게 메세지를 보내기 위해 누가 연결되어 있는지 확인하는 코드
 const sockets = [];
-
 wss.on("connection", (socket) => {
-  console.log(socket)
   sockets.push(socket);
-  socket["nickname"] = "Anon"
-  console.log("Connected to Browser");
-  socket.on("close", () => console.log("Disconnected from Browser"));
+  socket["nickname"] = "Anon";
+  console.log("Connected to Browser ✅");
+  socket.on("close", onSocketClose);
   socket.on("message", (msg) => {
     const message = JSON.parse(msg);
     switch (message.type) {
       case "new_message":
-        sockets.forEach((aSocket) => aSocket.send(`${socket.nickname} : ${message.payload}`));
-        break;
+        sockets.forEach((aSocket) =>
+          aSocket.send(`${socket.nickname}: ${message.payload}`)
+        );
       case "nickname":
-        socket["nickname"] = message.payload
-        break;
+        socket["nickname"] = message.payload;
     }
   });
-  // socket.send("hello!!!!");
-});
-
-server.listen(3000, handleListen);
+}); */
+const handleListen = () => console.log(`Listening on http://localhost:3000`);
+httpServer.listen(3000, handleListen);

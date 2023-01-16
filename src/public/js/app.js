@@ -24,9 +24,6 @@ socket.addEventListener("close", () => {
   console.log("Disconnected from Server");
 });
 
-// setTimeout(()=>{
-//     socket.send("Hello from the Browser!")
-// },10000)
 
 messageForm.addEventListener("submit", (e) => {
   e.preventDefault();
