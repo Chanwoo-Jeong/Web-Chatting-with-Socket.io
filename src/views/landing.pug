@@ -1,0 +1,49 @@
+html(lang="en")
+    head
+        meta(charset="UTF-8")
+        meta(http-equiv="X-UA-Compatible", content="IE=edge")
+        meta(name="viewport", content="width=device-width, initial-scale=1.0")
+        title HandsUp
+        link(rel="stylesheet", href="https://unpkg.com/mvp.css")
+        style 
+             include ./landing.css
+    body 
+        header 
+            h1 Hand's UP
+        main
+            div#navigation
+                button.btn#homebtn 채팅방 만들기
+                button.btn#openroom 오픈채팅방
+                button.btn 쪽지
+
+
+            div.mainContainer
+                div.home
+                    div.StartChatting.Layout
+                        div#welcome
+                            form 
+                                input(type="text" , placeholder="채팅방이름을 설정하세요", required)
+                                button  오픈채팅방 만들기
+                            
+                         
+
+                    div#openroomList.openRooms.Layout
+                        h4 Open Rooms 
+                                    ul
+                                    
+                div#showRoom                                   
+                    div#room
+                            h3
+                            ul 
+                        
+                            div#SettingBox
+                                form#name 
+                                    input(type="text" placeholder="닉네임",required)
+                                    button 설정하기  
+                                form#msg 
+                                    input(type="text" placeholder="메세지내용",required)
+                                    button 보내기 
+
+        script(src="/public/js/landing.js")
+        script(src="/socket.io/socket.io.js")
+        script(src="/public/js/socketIoApp.js")

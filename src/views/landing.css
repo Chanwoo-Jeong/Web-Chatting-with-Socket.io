@@ -1,0 +1,44 @@
+#navigation { 
+    display: flex;
+    flex-direction: row;
+
+}
+
+#navigation .btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    margin-right: 5px;
+    width: fit-content ;
+    padding-left: 8px;
+    padding-right:8px;
+    height: 40px;
+}
+
+.StartChatting{
+    display: none;
+}
+.openRooms{
+    display: none;
+}
+
+.openRooms ul button{
+    margin-right: 8px;
+}
+
+.active { 
+    display: flex;
+}
+
+#SettingBox { 
+    display: flex;
+    flex-direction: row;
+}
+
+.mainContainer{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
