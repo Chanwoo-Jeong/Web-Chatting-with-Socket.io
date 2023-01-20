@@ -1,130 +1,114 @@
 const socket = io();
 
-const welcome = document.getElementById("welcome");
-const form = welcome.querySelector("form");
-const room = document.getElementById("room");
-const openroomList = document.getElementById("openroomList")
-const showRoom = document.getElementById("showRoom")
+const welcome = document.getElementById("welcome"); //chatRoom 만드는 div
+const form = welcome.querySelector("form"); //chatRoom form
+const room = document.getElementById("room"); // chatting Room
+const openroomList = document.getElementById("openroomList"); //열려있는 채팅룸
+const showRoom = document.getElementById("showRoom"); // 채팅방 전체 div
 
-room.hidden = true
+room.hidden = true;
 
+//현재 룸이름 여기서 자신의 현재위치를 파악
 let roomName;
-function addMessage(message){
-    const ul = room.querySelector("ul")
-    const li = document.createElement("li")
-    li.innerText = message
-    ul.appendChild(li)
+
+function addMessage(message) {
+  const ul = room.querySelector("ul");
+  const li = document.createElement("li");
+  li.innerText = message;
+  ul.appendChild(li);
 }
 
+//채팅방 생성기
 form.addEventListener("submit", (e) => {
   e.preventDefault();
 
-  const ChattingContent = showRoom.querySelector("#room ul")
+  const ChattingContent = showRoom.querySelector("#room ul");
   while (ChattingContent.hasChildNodes()) {
     ChattingContent.removeChild(ChattingContent.firstChild);
   }
 
   const input = form.querySelector("input");
+  roomName = input.value;
 
-  socket.emit("enter_room", input.value , () => {
-   room.hidden = false
-   const h3 = room.querySelector("h3")
-   h3.innerText = `Room ${roomName}`
-   const messageForm = room.querySelector("#msg")
-   const nameForm = room.querySelector("#name")
-
-   nameForm.addEventListener("submit",(e)=>{
-    e.preventDefault()
-    const input = room.querySelector("#name input")
-    socket.emit("nickname", input.value)
-   })
-
-   messageForm.addEventListener("submit", (e)=>{
-    e.preventDefault()
-    const input = room.querySelector("#msg input")
-    const value = input.value
-    socket.emit("new_message",input.value,roomName,()=>{
-        addMessage(`You : ${value}`)
-    })
-    input.value =""
-   })
+  socket.emit("enter_room", input.value, () => {
+    room.hidden = false;
+    const h3 = room.querySelector("h3");
+    h3.innerText = `Room ${roomName}`;
   });
-
-  roomName = input.value
   input.value = "";
   //오픈채팅방 ui로 변경해주는 요소 landing.js파일확인하기
-  removeActive(Layout)
-    openRoomsLayout.classList.add("active")
-
-
+  removeActive(Layout);
+  openRoomsLayout.classList.add("active");
 });
 
-socket.on("welcome", (user,newCount)=>{
-    const h3 = room.querySelector("h3")
-    h3.innerText = `Room ${roomName} (${newCount})`
-    addMessage(`Welcome ${user}`)
-})
+// 닉네임과 , 메세지 보내는 역할
+const messageForm = room.querySelector("#msg");
+const nameForm = room.querySelector("#name");
 
-socket.on("bye", (left,newCount)=>{
-    const h3 = room.querySelector("h3")
-    h3.innerText = `Room ${roomName} (${newCount})`
-    addMessage(`Left ${left}`)
-})
+//닉네임 설정기
+nameForm.addEventListener("submit", (e) => {
+  e.preventDefault();
+  const input = room.querySelector("#name input");
+  socket.emit("nickname", input.value);
+});
 
-socket.on("new_message", (msg)=>{
-    addMessage(msg)
-})
+//메세지 전송하기
+messageForm.addEventListener("submit", (e) => {
+  e.preventDefault();
+  const input = room.querySelector("#msg input");
+  const roomNumber = room.querySelector("#roomNumber");
+  console.log(roomNumber);
+  const value = input.value;
+  socket.emit("new_message", value, roomName, () => {
+    console.log(`${roomName}로 보내짐`);
+    addMessage(`You : ${value}`);
+  });
+  input.value = "";
+});
 
-socket.on("room_change", (msg)=> console.log(msg))
+socket.on("welcome", (user, newCount) => {
+  const h3 = room.querySelector("h3");
+  h3.innerText = `Room ${roomName} (${newCount})`;
+  addMessage(`Welcome ${user}`);
+});
 
-socket.on("room_change", (rooms)=>{
-    const roomList = openroomList.querySelector("ul")
-    roomList.innerHTML = ""
-    if(rooms.length===0){
-        return
-    }
-    rooms.forEach((roomN) =>{
-        const li = document.createElement("button")
-        li.innerText = roomN
-        li.classList.add(roomN)
+socket.on("bye", (left, newCount) => {
+  const h3 = room.querySelector("h3");
+  h3.innerText = `Room ${roomName} (${newCount})`;
+  addMessage(`Left ${left}`);
+});
 
-        li.addEventListener("click",()=>{
+socket.on("new_message", (msg) => {
+  addMessage(msg);
+});
 
-            // 모든 소켓 탈퇴
-            console.log(socket.id)
-            //roomN 이 아니라면 모두 나가기 = > server로 roomN보내기
-            socket.emit("getout_room",roomN)
+socket.on("room_change", (msg) => console.log(msg));
 
-            //채팅내역 모두 삭제
-            const ChattingContent = showRoom.querySelector("#room ul")
-            while (ChattingContent.hasChildNodes()) {
-                ChattingContent.removeChild(ChattingContent.firstChild);
-              }
+socket.on("room_change", (rooms) => {
+  const roomList = openroomList.querySelector("ul");
+  roomList.innerHTML = "";
+  if (rooms.length === 0) {
+    return;
+  }
+  rooms.forEach((roomN) => {
+    const li = document.createElement("button");
+    li.innerText = roomN;
+    li.classList.add(roomN);
 
-            socket.emit("enter_room", roomN , () => {
-                room.hidden = false
-                const h3 = room.querySelector("h3")
-                h3.innerText = `Room ${roomN}`
-                const messageForm = room.querySelector("#msg")
-                const nameForm = room.querySelector("#name")
-             
-                nameForm.addEventListener("submit",(e)=>{
-                 e.preventDefault()
-                 const input = room.querySelector("#name input")
-                 socket.emit("nickname", input.value)
-                })
-             
-                messageForm.addEventListener("submit", (e)=>{
-                 e.preventDefault()
-                 const input = room.querySelector("#msg input")
-                 const value = input.value
-                 socket.emit("new_message",input.value,roomN,()=>{
-                     addMessage(`You : ${value}`)
-                 })
-                 input.value =""
-                })
-               });
-        })
-        roomList.append(li)
-    })
-})
+    li.addEventListener("click", () => {
+      //채팅내역 모두 삭제
+      const ChattingContent = showRoom.querySelector("#room ul");
+      while (ChattingContent.hasChildNodes()) {
+        ChattingContent.removeChild(ChattingContent.firstChild);
+      }
+      roomName = roomN;
+
+      socket.emit("enter_room", roomN, () => {
+        room.hidden = false;
+        const h3 = room.querySelector("h3");
+        h3.innerText = `Room ${roomN}`;
+      });
+    });
+    roomList.append(li);
+  });
+});
