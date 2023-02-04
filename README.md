@@ -1,5 +1,7 @@
 # Web - Chatting 을 만들어보자!
 
+<img width="1259" alt="image" src="https://user-images.githubusercontent.com/91375979/216774398-63279c9c-387e-4ead-b8dd-d5a1ce29d7c8.png">
+
 ✔️ 사용법 npm run dev
 
 🪄 Use Stack : Socket.io , Node.js
