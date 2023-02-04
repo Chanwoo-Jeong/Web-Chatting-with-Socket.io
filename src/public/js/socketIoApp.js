@@ -11,18 +11,25 @@ room.hidden = true;
 //현재 룸이름 여기서 자신의 현재위치를 파악
 let roomName;
 
-function addMessage(message) {
-  const ul = room.querySelector("ul");
-  const li = document.createElement("li");
+function addMessage(message, location) {
+  const ul = room.querySelector("#ChatBox");
+  const box = document.createElement("div");
+  const li = document.createElement("div");
+  box.appendChild(li);
+  box.style.display = "flex";
+  if(location === "Right"){
+    box.style.justifyContent = "flex-end"
+  }
   li.innerText = message;
-  ul.appendChild(li);
+  li.classList.add(location);
+  ul.appendChild(box);
 }
 
 //채팅방 생성기
 form.addEventListener("submit", (e) => {
   e.preventDefault();
 
-  const ChattingContent = showRoom.querySelector("#room ul");
+  const ChattingContent = showRoom.querySelector("#ChatBox");
   while (ChattingContent.hasChildNodes()) {
     ChattingContent.removeChild(ChattingContent.firstChild);
   }
@@ -61,7 +68,7 @@ messageForm.addEventListener("submit", (e) => {
   const value = input.value;
   socket.emit("new_message", value, roomName, () => {
     console.log(`${roomName}로 보내짐`);
-    addMessage(`You : ${value}`);
+    addMessage(`You : ${value}`, "Left");
   });
   input.value = "";
 });
@@ -78,8 +85,8 @@ socket.on("bye", (left, newCount) => {
   addMessage(`Left ${left}`);
 });
 
-socket.on("new_message", (msg) => {
-  addMessage(msg);
+socket.on("new_message", (msg, loc) => {
+  addMessage(msg, loc);
 });
 
 socket.on("room_change", (msg) => console.log(msg));
@@ -97,7 +104,7 @@ socket.on("room_change", (rooms) => {
 
     li.addEventListener("click", () => {
       //채팅내역 모두 삭제
-      const ChattingContent = showRoom.querySelector("#room ul");
+      const ChattingContent = showRoom.querySelector("#ChatBox");
       while (ChattingContent.hasChildNodes()) {
         ChattingContent.removeChild(ChattingContent.firstChild);
       }

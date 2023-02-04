@@ -42,3 +42,29 @@
     justify-content: space-between;
 }
 
+#ChatBox {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.Left {
+    width: fit-content;
+    height: fit-content;
+    background: #EFEFEF;
+    border-radius: 20px 20px 20px 0px;
+    text-align: left;
+    padding: 10px;
+    margin-bottom: 5px;
+}
+
+.Right { 
+    width: fit-content;
+    height: fit-content;
+    background: #4F7EC0;
+    border-radius: 20px 20px 0px 20px;
+    text-align: right;
+    padding: 10px;
+    margin-bottom: 5px;
+}
+

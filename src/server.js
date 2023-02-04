@@ -71,7 +71,7 @@ wsServer.on("connection", (socket) => {
       }
     });
     console.log(`new messages ===> ${room}`);
-    socket.to(room).emit("new_message", `${socket.nickname}: ${msg}`);
+    socket.to(room).emit("new_message", `${socket.nickname}: ${msg}` , "Right");
     done();
   });
   socket.on("nickname", (nickname) => (socket["nickname"] = nickname));
